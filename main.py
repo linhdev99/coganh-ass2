@@ -29,6 +29,11 @@ def updateBoard(board, start, end):
 
 
 def ganh(board, current):
+    # check row
+
+    # check col
+
+    # check cross line
     return board
 
 
@@ -86,41 +91,42 @@ def moveHint(board, pos):
         point = remainingTroop(temp, board[pos[0]][pos[1]])
         hints.append([point, start, end])
 
-    # up_left
-    # ex: (1,1) --> (0,0) | (i,j) --> (i-1,j-1)
-    if abs(pos[0] - pos[1]) % 2 == 0 and pos[0] > 0 and pos[1] > 0 and board[pos[0]-1][pos[1]-1] == 0:
-        clone = board_clone(board)
-        end = (pos[0]-1, pos[1]-1)
-        temp = updateBoard(clone, start, end)
-        point = remainingTroop(temp, board[pos[0]][pos[1]])
-        hints.append([point, start, end])
+    if (pos[0] + pos[1]) % 2 == 0:
+        # up_left
+        # ex: (1,1) --> (0,0) | (i,j) --> (i-1,j-1)
+        if pos[0] > 0 and pos[1] > 0 and board[pos[0]-1][pos[1]-1] == 0:
+            clone = board_clone(board)
+            end = (pos[0]-1, pos[1]-1)
+            temp = updateBoard(clone, start, end)
+            point = remainingTroop(temp, board[pos[0]][pos[1]])
+            hints.append([point, start, end])
 
-    # up_right
-    # ex: (1,1) --> (0,2) | (i,j) --> (i-1,j+1)
-    if abs(pos[0] - pos[1]) % 2 == 0 and pos[0] > 0 and pos[1] < 4 and board[pos[0]-1][pos[1]+1] == 0:
-        clone = board_clone(board)
-        end = (pos[0]-1, pos[1]+1)
-        temp = updateBoard(clone, start, end)
-        point = remainingTroop(temp, board[pos[0]][pos[1]])
-        hints.append([point, start, end])
+        # up_right
+        # ex: (1,1) --> (0,2) | (i,j) --> (i-1,j+1)
+        if pos[0] > 0 and pos[1] < 4 and board[pos[0]-1][pos[1]+1] == 0:
+            clone = board_clone(board)
+            end = (pos[0]-1, pos[1]+1)
+            temp = updateBoard(clone, start, end)
+            point = remainingTroop(temp, board[pos[0]][pos[1]])
+            hints.append([point, start, end])
 
-    # down_left
-    # ex: (1,1) --> (2,0) | (i,j) --> (i+1,j-1)
-    if (pos[0] + pos[1]) % 2 == 0 and pos[0] < 4 and pos[1] > 0 and board[pos[0]+1][pos[1]-1] == 0:
-        clone = board_clone(board)
-        end = (pos[0]+1, pos[1]-1)
-        temp = updateBoard(clone, start, end)
-        point = remainingTroop(temp, board[pos[0]][pos[1]])
-        hints.append([point, start, end])
+        # down_left
+        # ex: (1,1) --> (2,0) | (i,j) --> (i+1,j-1)
+        if pos[0] < 4 and pos[1] > 0 and board[pos[0]+1][pos[1]-1] == 0:
+            clone = board_clone(board)
+            end = (pos[0]+1, pos[1]-1)
+            temp = updateBoard(clone, start, end)
+            point = remainingTroop(temp, board[pos[0]][pos[1]])
+            hints.append([point, start, end])
 
-    # down_right
-    # ex: (1,1) --> (2,2) | (i,j) --> (i+1,j+1)
-    if (pos[0] + pos[1]) % 2 == 0 and pos[0] < 4 and pos[1] < 4 and board[pos[0]+1][pos[1]+1] == 0:
-        clone = board_clone(board)
-        end = (pos[0]+1, pos[1]+1)
-        temp = updateBoard(clone, start, end)
-        point = remainingTroop(temp, board[pos[0]][pos[1]])
-        hints.append([point, start, end])
+        # down_right
+        # ex: (1,1) --> (2,2) | (i,j) --> (i+1,j+1)
+        if pos[0] < 4 and pos[1] < 4 and board[pos[0]+1][pos[1]+1] == 0:
+            clone = board_clone(board)
+            end = (pos[0]+1, pos[1]+1)
+            temp = updateBoard(clone, start, end)
+            point = remainingTroop(temp, board[pos[0]][pos[1]])
+            hints.append([point, start, end])
 
     return hints
 
