@@ -203,7 +203,6 @@ def depthNeighbor(board, pos, closed=[]):
 
 
 def vay(board, player):
-    # vay này chưa đúng
     enemy = -1 * player
     closed = []
     for i in range(0, 5):
@@ -291,7 +290,7 @@ def main2(first='X'):
             if temp == None:
                 return 1
             else:
-                print(first, temp)
+                # print(first, temp)
                 board = updateBoard(board, temp[0], temp[1])
             first = 'O'
         elif first == 'O':
@@ -299,11 +298,11 @@ def main2(first='X'):
             if temp == None:
                 return -1
             else:
-                print(first, temp)
+                # print(first, temp)
                 board = updateBoard(board, temp[0], temp[1])
             first = 'X'
-        printBoard(board)
-        print("=======")
+        # printBoard(board)
+        # print("=======")
 
 def test():
     board = [
@@ -323,22 +322,22 @@ def main():
         O : 1
         X : -1 
     """
-    test()
+    # test()
     # win = main2('X')
     # print(win)
     # board = board_initial()
     # a = board_clone(board)
     # print(a)
-    # count = 0
-    # for x in range(0, 100):
-    #     win = main2('X')
-    #     if win == 1:
-    #         continue
-    #         # print("O: win")
-    #     else:
-    #         count += 1
-    #         # print("X: win")
-    # print("X win %d" % (count), "%")
+    count = 0
+    for x in range(0, 100):
+        win = main2('X')
+        if win == 1:
+            continue
+            # print("O: win")
+        else:
+            count += 1
+            # print("X: win")
+    print("X win %d" % (count), "%")
 
 
 if __name__ == '__main__':
