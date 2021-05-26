@@ -29,6 +29,7 @@ def updateBoard(board, start, end):
     x2, y2 = end
     board[x2][y2] = board[x1][y1]
     board[x1][y1] = 0
+    # printBoard(board)
     board = ganh(board, (x2, y2))
     board = vay(board, board[x2][y2])
     return board
@@ -69,6 +70,7 @@ def ganh(board, current):
 
 def findNeighbor(board, pos):
     enemy = board[pos[0]][pos[1]]
+    # print(enemy)
     neighbor = []
     if pos[0] > 0 and board[pos[0]-1][pos[1]] == enemy:
         neighbor.append((pos[0]-1, pos[1]))
@@ -109,7 +111,9 @@ def findNeighbor(board, pos):
         if pos[0] < 4 and pos[1] < 4 and board[pos[0]+1][pos[1]+1] == enemy:
             neighbor.append((pos[0]+1, pos[1]+1))
 
+    # print(neighbor)
     return neighbor
+
 
 def findHint(board, pos):
     hints = []  # [point, start, end]
@@ -163,31 +167,41 @@ def findHint(board, pos):
 
     return hints
 
-def depthNeighbor(board, pos, closed = []):
+
+def depthNeighbor(board, pos, closed=[]):
     canMove = False
-    i,j = pos
-    fNeighbor = findNeighbor(board, (i, j))
+    i, j = pos
     hint = findHint(board, (i, j))
-    neighbor = []
-    # print("==========")
-    # print(neighbor)
-    for per in neighbor:
-        if not per in closed:
-            neighbor.append(per)
-    # print(neighbor)
-    # print("==========")
-    if neighbor == []:
-        if hint == []:
+    if hint != []:
+        return True
+    else:
+        neighbor = []
+        fNeighbor = findNeighbor(board, (i, j))
+        # print("==========")
+        # print(pos, fNeighbor, closed)
+        # print(closed)
+        # print(fNeighbor)
+        for per in fNeighbor:
+            if not per in closed:
+                neighbor.append(per)
+        # print(neighbor)
+        # print("==========")
+        if neighbor == []:
             return False
         else:
-            return True
-    else:
-        if not pos in closed:
-            closed.append(pos)
-        for per in neighbor:
-            canMove = depthNeighbor(board, per, closed)
-            if canMove:
-                return True
+            # print("pos", pos)
+            if not pos in closed:
+                closed.append(pos)
+            for per in neighbor:
+                # print(per)
+                canMove = depthNeighbor(board, per, closed)
+                # print(canMove)
+                # print("========")
+                if canMove:
+                    return True
+            return False
+
+
 def vay(board, player):
     # vay này chưa đúng
     enemy = -1 * player
@@ -195,25 +209,11 @@ def vay(board, player):
     for i in range(0, 5):
         for j in range(0, 5):
             if board[i][j] == enemy:
-                temp = depthNeighbor(board, (i,j))
-                if not temp:
-                    closed.append((i,j))
-                # temp = True
-                # neighbor = findNeighbor(board, (i, j))
-                # while neighbor != []:
-                #     hint = findHint(board, (i, j))
-                # hint = findHint(board, (i, j))
-                # if hint == []:
-                #     neighbor = findNeighbor(board, (i, j))
-                #     canMove = False
-                #     for i in range(0, len(neighbor)):
-                #         hint_neigh = findHint(board, neighbor[i])
-                #         if hint_neigh != []:
-                #             canMove = True
-                #             break
-                #     if not canMove:
-                #         closed.append((i,j))
-                #     board[i][j] = player
+                # print((i,j), board[i][j])
+                canMove = depthNeighbor(board, (i, j), [])
+                # print(canMove)
+                if not canMove:
+                    closed.append((i, j))
     for per in closed:
         board[per[0]][per[1]] = player
     return board
@@ -238,82 +238,6 @@ def moveHint(board, pos):
         point = remainingTroop(temp, board[pos[0]][pos[1]])
         hints.append([point, start, end])
     return hints
-    # # => (i+j) mod 2 == 0 => /
-    # # => |i-j| mod 2 == 0 => \
-    # # up
-    # # ex: (1,1) --> (0,1) | (i,j) --> (i-1,j)
-    # if pos[0] > 0 and board[pos[0]-1][pos[1]] == 0:
-    #     clone = board_clone(board)
-    #     end = (pos[0] - 1, pos[1])
-    #     temp = updateBoard(clone, start, end)
-    #     point = remainingTroop(temp, board[pos[0]][pos[1]])
-    #     hints.append([point, start, end])
-
-    # # down
-    # # ex: (1,1) --> (2,1) | (i,j) --> (i+1,j)
-    # if pos[0] < 4 and board[pos[0]+1][pos[1]] == 0:
-    #     clone = board_clone(board)
-    #     end = (pos[0] + 1, pos[1])
-    #     temp = updateBoard(clone, start, end)
-    #     point = remainingTroop(temp, board[pos[0]][pos[1]])
-    #     hints.append([point, start, end])
-
-    # # left
-    # # ex: (1,1) --> (1,0) | (i,j) --> (i,j-1)
-    # if pos[1] > 0 and board[pos[0]][pos[1]-1] == 0:
-    #     clone = board_clone(board)
-    #     end = (pos[0], pos[1]-1)
-    #     temp = updateBoard(clone, start, end)
-    #     point = remainingTroop(temp, board[pos[0]][pos[1]])
-    #     hints.append([point, start, end])
-
-    # # right
-    # # ex: (1,1) --> (1,2) | (i,j) --> (i,j+1)
-    # if pos[1] < 4 and board[pos[0]][pos[1]+1] == 0:
-    #     clone = board_clone(board)
-    #     end = (pos[0], pos[1]+1)
-    #     temp = updateBoard(clone, start, end)
-    #     point = remainingTroop(temp, board[pos[0]][pos[1]])
-    #     hints.append([point, start, end])
-
-    # if (pos[0] + pos[1]) % 2 == 0:
-    #     # up_left
-    #     # ex: (1,1) --> (0,0) | (i,j) --> (i-1,j-1)
-    #     if pos[0] > 0 and pos[1] > 0 and board[pos[0]-1][pos[1]-1] == 0:
-    #         clone = board_clone(board)
-    #         end = (pos[0]-1, pos[1]-1)
-    #         temp = updateBoard(clone, start, end)
-    #         point = remainingTroop(temp, board[pos[0]][pos[1]])
-    #         hints.append([point, start, end])
-
-    #     # up_right
-    #     # ex: (1,1) --> (0,2) | (i,j) --> (i-1,j+1)
-    #     if pos[0] > 0 and pos[1] < 4 and board[pos[0]-1][pos[1]+1] == 0:
-    #         clone = board_clone(board)
-    #         end = (pos[0]-1, pos[1]+1)
-    #         temp = updateBoard(clone, start, end)
-    #         point = remainingTroop(temp, board[pos[0]][pos[1]])
-    #         hints.append([point, start, end])
-
-    #     # down_left
-    #     # ex: (1,1) --> (2,0) | (i,j) --> (i+1,j-1)
-    #     if pos[0] < 4 and pos[1] > 0 and board[pos[0]+1][pos[1]-1] == 0:
-    #         clone = board_clone(board)
-    #         end = (pos[0]+1, pos[1]-1)
-    #         temp = updateBoard(clone, start, end)
-    #         point = remainingTroop(temp, board[pos[0]][pos[1]])
-    #         hints.append([point, start, end])
-
-    #     # down_right
-    #     # ex: (1,1) --> (2,2) | (i,j) --> (i+1,j+1)
-    #     if pos[0] < 4 and pos[1] < 4 and board[pos[0]+1][pos[1]+1] == 0:
-    #         clone = board_clone(board)
-    #         end = (pos[0]+1, pos[1]+1)
-    #         temp = updateBoard(clone, start, end)
-    #         point = remainingTroop(temp, board[pos[0]][pos[1]])
-    #         hints.append([point, start, end])
-
-    # return hints
 
 
 def move(board, player):
@@ -353,9 +277,9 @@ def printBoard(board):
 
 def main2(first='X'):
     board = board_initial()
-    # step = 0
-    while True:
-        # step += 1
+    step = 0
+    while step < 1000:
+        step += 1
         p1 = remainingTroop(board, 1)
         p2 = remainingTroop(board, -1)
         if p1 == 16:
@@ -381,14 +305,27 @@ def main2(first='X'):
         printBoard(board)
         print("=======")
 
+def test():
+    board = [
+        [1,  -1,  -1,  -1,  1],
+        [1,  0,  0,  0,  1],
+        [1,  0,  -1,  0,  0],
+        [-1,  0,  0,  1, -1],
+        [-1, -1, -1, 0, -1]
+    ]
+    printBoard(board)
+    print('=============')
+    board = updateBoard(board, (2,0), (3,1))
+    printBoard(board)
 
 def main():
     """
         O : 1
         X : -1 
     """
-    win = main2('O')
-    print(win)
+    test()
+    # win = main2('X')
+    # print(win)
     # board = board_initial()
     # a = board_clone(board)
     # print(a)
