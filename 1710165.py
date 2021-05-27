@@ -2,13 +2,100 @@ import time
 import copy
 import random
 
+COUNT = 0
+
+
+class Node:
+    def __init__(self, player, cur_board, depth=0):
+        self.board = cur_board
+        self.value = cur_board.getPoint(player)
+        self.previous = None
+        self.next = []
+        self.depth = depth
+
+    def insert(self, player, board, depth=0):
+        element = Node(board, player)
+        self.next.append(element)
+        self.depth = depth
+
+    def printTree(self):
+        print("print tree...")
+        f = open("tree.txt", "w")
+        global COUNT
+        f.write("COUNT: " + str(COUNT))
+        f.close()
+        self.printFile()
+    
+    def printFile(self):
+        f = open("tree.txt", "r")
+        old_s = f.read()
+        f.close()
+        f = open("tree.txt", "w")
+        # print("depth:", self.depth, ", value:", self.value, "-----------")
+        new_s = ""
+        for i in range(0, self.depth):
+            new_s = new_s + "__"
+        new_s = new_s + "depth: " + str(self.depth) + \
+                ", value: " + str(self.value) + " -------"
+        new_s = old_s + "\n" + new_s
+        board = self.board.board
+        new_s = new_s + "\n" + "---------------------------------"
+        for i in range(0, 5):
+            # print(board[i][0])
+            board_s = str(board[i][0]) + "\t" + \
+                    str(board[i][1]) + "\t" + \
+                    str(board[i][2]) + "\t" + \
+                    str(board[i][3]) + "\t" + \
+                    str(board[i][4]) + "\t"
+            new_s = new_s + "\n" + board_s
+            # print(board_s)
+        new_s = new_s + "\n" + "---------------------------------"
+        f.write(new_s)
+        # self.board.printBoard()
+        # print("-----------------------")
+        f.close()
+        if self.depth >= 0:
+            for ele in self.next:
+                ele.printFile()
+
 
 class AI:
     def __init__(self):
         self.timeStart = time.time()
         self.timeExceeded = False
-        
-    
+
+    def create_tree(self, depth, player, tree=None):
+        global COUNT
+        if depth == 0:
+            return tree
+        else:
+            if tree == None:
+                board = Board()
+                board.initialBoard()
+                tree = Node(player, board)
+            board = tree.board
+            hints = board.getAvailableHint(player)
+            for hint in hints:
+                value = hint[0]
+                start = hint[1]
+                end = hint[2]
+                clone = Board()
+                clone.initialBoard()
+                clone.setBoard(board.board)
+                clone.updateBoard(start, end)
+                # print(hint)
+                # clone.printBoard()
+                element = Node(-1 * player, clone, depth-1)
+                element.previous = tree
+                tree.next.append(element)
+                COUNT += 1
+                self.create_tree(depth-1, -1 * player, element)
+            return tree
+        # print(len(tree.next))
+
+    def alpha_beta_arth():
+        pass
+
 
 class Board:
     def __init__(self):
@@ -29,6 +116,7 @@ class Board:
 
     def setBoard(self, gird):
         self.board = copy.deepcopy(gird)
+        self.remainingTroop()
 
     def getAvailableHint(self, player):
         board = self.board
@@ -37,9 +125,13 @@ class Board:
             for j in range(0, 5):
                 if board[i][j] == player:
                     clone = self.board_clone()
-                    hints = clone.moveHints((i, j))
+                    tempHints = clone.moveHints((i, j))
+                    for hint in tempHints:
+                        hints.append(hint)
                     # self.printBoard()
-                    print((i, j), hints)
+                    # print(tempHints)
+        # print(hints)
+        return hints
 
     def findHint(self, pos):
         hints = []  # [point, start, end]
@@ -248,6 +340,13 @@ class Board:
         self.red = red
         self.blue = blue
 
+    def getPoint(self, player):
+        self.remainingTroop()
+        if player == 1:
+            return self.red
+        elif player == -1:
+            return self.blue
+
     def updateBoard(self, start, end):
         x1, y1 = start
         x2, y2 = end
@@ -276,31 +375,44 @@ class Board:
 
     def printBoard(self):
         board = self.board
+        print("---------------------------------")
         for i in range(0, 5):
             print("%d\t%d\t%d\t%d\t%d" %
                   (board[i][0], board[i][1], board[i][2], board[i][3], board[i][4]))
+        print("---------------------------------")
 
 
 class Player:
     def __init__(self):
         self.name = 0
-        self. depth = 5
-        self.preBoard = Board()
-        self.preBoard.initialBoard()
-        
-    def next_move(self, cur_board):
-        result = [] # (start, end)
-        #use AI
+        self.depth = 3
+        self.board = Board()
+        self.board.initialBoard()
+        self.tree = None
+
+    def move(self, cur_board, name):
+        self.board.setBoard(cur_board)
+        self.name = name
+        result = self.next_move()
         return result
 
+    def next_move(self):
+        result = tuple()  # (start, end)
+        self.tree = Node(self.name, self.board, self.depth)
+        ai = AI()
+        ai.create_tree(self.depth, self.name, self.tree)
+        # global COUNT
+        # self.tree.printTree()
+        # print(COUNT)
+
+        # self.board.getAvailableHint(self.name)
+        return result
+
+
 def move(board, player):
-    maxPoint = 0
-    start = None
-    end = None
-    savePoint = []
-    gird = Board()
-    gird.setBoard(board)
-    gird.printBoard()
+    troop = Player()
+    state = troop.move(board, player)
+    return state
 
 
 def printBoard(board):
@@ -317,7 +429,7 @@ def main2(first='X'):
         [-1,  0,  0,  0, -1],
         [-1, -1, -1, -1, -1]
     ]
-    move(board, -1)
+    move(board, 1)
     # gird = Board()
     # gird.initialBoard()
     # gird.printBoard()
@@ -373,7 +485,7 @@ def main():
         X : -1 
     """
     # test()
-    win = main2('X')
+    win = main2('O')
     # print(win)
     # board = board_initial()
     # a = board_clone(board)
