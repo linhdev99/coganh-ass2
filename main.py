@@ -323,21 +323,21 @@ def main():
         X : -1 
     """
     # test()
-    # win = main2('X')
-    # print(win)
+    win = main2('X')
+    print(win)
     # board = board_initial()
     # a = board_clone(board)
     # print(a)
-    count = 0
-    for x in range(0, 100):
-        win = main2('X')
-        if win == 1:
-            continue
-            # print("O: win")
-        else:
-            count += 1
-            # print("X: win")
-    print("X win %d" % (count), "%")
+    # count = 0
+    # for x in range(0, 100):
+    #     win = main2('O')
+    #     if win == 1:
+    #         continue
+    #         # print("O: win")
+    #     else:
+    #         count += 1
+    #         # print("X: win")
+    # print("X win %d" % (count), "%")
 
 
 if __name__ == '__main__':
