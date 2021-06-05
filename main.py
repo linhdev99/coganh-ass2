@@ -3,6 +3,8 @@ import copy
 import random
 import math
 
+PRE_BOARD = None
+
 
 def board_initial():
     board = [
@@ -12,6 +14,13 @@ def board_initial():
         [-1,  0,  0,  0, -1],
         [-1, -1, -1, -1, -1]
     ]
+    # board = [
+    #     [0, -1, -1, -1, -1],
+    #     [-1, -1, 0, 0, -1],
+    #     [0, 0, 0, 0, 1],
+    #     [-1, -1, -1, 0, 1],
+    #     [1, 0, 1, 1, 1]
+    # ]
     return board
 
 
@@ -239,7 +248,99 @@ def moveHint(board, pos):
     return hints
 
 
-def move(board, player):
+def ai_hints(board, player):
+    maxPoint = 0
+    start = None
+    end = None
+    savePoint = []
+    hints = []
+    for i in range(0, 5):
+        for j in range(0, 5):
+            if board[i][j] == player:
+                temp = moveHint(board, (i, j))
+                for hint in temp:
+                    hints.append(hint)
+    return hints
+
+
+def pos_difference(preb, board, player):
+    enemy = -1 * player
+    start = None
+    end = None
+    for i in range(0, 5):
+        for j in range(0, 5):
+            if board[i][j] == 0 and preb[i][j] != 0:
+                start = (i, j)
+            if preb[i][j] == 0 and board[i][j] != 0:
+                end = (i, j)
+    return (start, end)
+
+
+def compare_pos(pos1, pos2):
+    if pos1[0] == pos2[0] and pos1[1] == pos2[1]:
+        return True
+    return False
+
+def canGanh(board, start, end):
+    clone = board_clone(board)
+    x1, y1 = start
+    x2, y2 = end
+    player = clone[x1][y1]
+    cur_troop = remainingTroop(clone, player)
+    clone[x2][y2] = clone[x1][y1]
+    clone[x1][y1] = 0
+    clone = ganh(clone, (x2, y2))
+    new_troop = remainingTroop(clone, player)
+    if new_troop > cur_troop:
+        return True
+    return False
+
+def check_bay(preb, board, enemy, pos, hints):
+    pre_enemy = remainingTroop(preb, enemy)
+    cur_enemy = remainingTroop(board, enemy)
+    start_enemy = pos[0]
+    end_enemy = pos[1]
+    if pre_enemy == cur_enemy:
+        for hint in hints:
+            start_player = hint[1]
+            end_player = hint[2]
+            # print(start_player, end_player)
+            if compare_pos(start_enemy, end_player):
+                clone = board_clone(board)
+                if canGanh(clone, start_player, end_player):
+                    return True
+    return False
+
+
+def ai_call(preb, board, player):
+    if preb == None:
+        pos = move_old(board, player)
+        return pos
+    else:
+        pos_diff = pos_difference(preb, board, player)
+        hints = ai_hints(board, player)
+        isBay = check_bay(preb, board, -1 * player, pos_diff, hints)
+        if isBay:
+            maxPoint = -math.inf
+            start = None
+            end = None
+            pos = None
+            for hint in hints:
+                if hint[0] > maxPoint and compare_pos(hint[2], pos_diff[0]):
+                    maxPoint = hint[0]
+                    start = hint[1]
+                    end = hint[2]
+                    pos = (start, end)
+            if pos != None:
+                return pos
+            else:
+                pos = move_old(board, player)
+                return pos
+        else:
+            pos = move_old(board, player)
+            return pos
+
+def move_old(board, player):
     maxPoint = 0
     start = None
     end = None
@@ -261,11 +362,25 @@ def move(board, player):
     if savePoint == []:
         return None
     else:
-        idx = random.randint(0, len(savePoint)-1)
-        hint = savePoint[idx]
+        # idx = random.randint(0, len(savePoint)-1)
+        hint = savePoint[0]
         start = hint[1]
         end = hint[2]
         return (start, end)
+
+def move(board, player):
+    global PRE_BOARD
+    pos = None
+    if player == 1:
+        pos = ai_call(PRE_BOARD, board, player)
+        if pos == None:
+            return None
+        newb = board_clone(board)
+        newb = updateBoard(newb, pos[0], pos[1])
+        PRE_BOARD = newb
+    elif player == -1:
+        pos = move_old(board, player)
+    return pos
 
 
 def printBoard(board):
@@ -286,36 +401,46 @@ def main2(first='X'):
         if p2 == 16:
             return -1
         if first == 'X':
-            temp = move(board, -1)
-            if temp == None:
-                return 1
-            else:
-                # print(first, temp)
-                board = updateBoard(board, temp[0], temp[1])
-            first = 'O'
-        elif first == 'O':
             temp = move(board, 1)
             if temp == None:
                 return -1
             else:
-                # print(first, temp)
+                print(first, temp)
+                board = updateBoard(board, temp[0], temp[1])
+            first = 'O'
+        elif first == 'O':
+            temp = move(board, -1)
+            if temp == None:
+                return 1
+            else:
+                print(first, temp)
                 board = updateBoard(board, temp[0], temp[1])
             first = 'X'
-        # printBoard(board)
-        # print("=======")
+        printBoard(board)
+        print("=======")
+
 
 def test():
+    """
+
+O - O O O
+X X X - O
+- - - - O
+X X - - X
+- X X X X
+    """
     board = [
-        [1,  -1,  -1,  -1,  1],
-        [1,  0,  0,  0,  1],
-        [1,  0,  -1,  0,  0],
-        [-1,  0,  0,  1, -1],
-        [-1, -1, -1, 0, -1]
+        [0, -1, -1, -1, -1],
+        [-1, -1, 0, 0, -1],
+        [0, 0, 0, 0, 1],
+        [-1, -1, -1, 0, 1],
+        [1, 0, 1, 1, 1]
     ]
     printBoard(board)
     print('=============')
-    board = updateBoard(board, (2,0), (3,1))
+    board = updateBoard(board, (3, 2), (3, 3))
     printBoard(board)
+
 
 def main():
     """

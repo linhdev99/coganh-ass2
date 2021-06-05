@@ -456,24 +456,24 @@ class Player:
     def next_move(self):
         result = tuple()  # (start, end)
         self.tree = Node(self.name, self.board, self.depth)
-        # maxHint = -math.inf
-        # start = None
-        # end = None
-        # countMaxHint = 0
-        # hints = self.tree.board.getAvailableHint(self.name)
-        # for hint in hints:
-        #     # print(hint)
-        #     if hint[0] > maxHint:
-        #         maxHint = hint[0]
-        #         start = hint[1]
-        #         end = hint[2]
-        #         countMaxHint = 1
-        #     elif hint[0] == maxHint:
-        #         countMaxHint += 1
-        # if countMaxHint <= 2:
-        #     return (start, end)
-        # else:
-        #     self.depth = 3
+        maxHint = -math.inf
+        start = None
+        end = None
+        countMaxHint = 0
+        hints = self.tree.board.getAvailableHint(self.name)
+        for hint in hints:
+            # print(hint)
+            if hint[0] > maxHint:
+                maxHint = hint[0]
+                start = hint[1]
+                end = hint[2]
+                countMaxHint = 1
+            elif hint[0] == maxHint:
+                countMaxHint += 1
+        if countMaxHint <= 2:
+            return (start, end)
+        else:
+            self.depth = 7
         ai = AI()
         alpha = (-math.inf, None, None)
         beta = (math.inf, None, None)
@@ -521,7 +521,7 @@ def main2(first='X'):
     # board = board_initial()
     grid.setBoard(board)
     step = 0
-    while step < 1000:
+    while step < 100:
         step += 1
         print(step)
         grid.remainingTroop()
